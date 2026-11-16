@@ -1,0 +1,10 @@
+model,validation,AUC,F1
+RF,Random 5-fold,0.823,0.738
+RF,Leave-one-subbasin-out,0.765,0.724
+RF,Hold out 2022 (n=21 flood),0.844,0.732
+XGB,Random 5-fold,0.821,0.76
+XGB,Leave-one-subbasin-out,0.777,0.696
+XGB,Hold out 2022 (n=21 flood),0.83,0.773
+ADA,Random 5-fold,0.803,0.725
+ADA,Leave-one-subbasin-out,0.773,0.724
+ADA,Hold out 2022 (n=21 flood),0.853,0.792

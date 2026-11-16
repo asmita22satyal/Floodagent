@@ -1,0 +1,109 @@
+id,category,request,expected_tools,tools_called,tools_ok,seconds,answer,error,expected_behavior,correct_0_1,honest_caveat_0_1,notes
+1,mapping,Show me the flood susceptibility map for the basin.,make_map,make_map,1,51.8,"I have generated the flood susceptibility map using the AdaBoost probability model layer.
+
+**How to read the map:**
+* **Yellow:** Low flood susceptibility
+* **Dark Red:** High flood susceptibility
+
+**Key Caveats:**
+* The map shows **relative susceptibility** based on terrain, land cover, soil, and historical rainfall predictors, not an actual flood extent, water depth, or forecast.
+* It reflects pattern similarities to 271 historical flood points (2007–2024) within the Lower Levisa Fork basin.",,Draws the probability layer; explains the colour legend; says it is susceptibility not a flood extent.,1.0,1.0,
+2,mapping,Map where the model says flood but FEMA does not.,make_map|compare_with_fema,make_map,1,99.6,"I have generated the agreement map comparing the machine-learning susceptibility model against FEMA's regulatory flood zones.
+
+### How to read the map:
+* **Orange:** **Model only** — Areas where the model identifies high flood susceptibility, but FEMA does not classify as a high-risk zone.
+* **Blue:** **Both** — Areas flagged as high-risk by both the model and FEMA.
+* **Red:** **FEMA only** — FEMA high-risk zones that the model classifies as low susceptibility.
+* **Clear:** **Both non-flood** — Low susceptibility / unmapped by both.
+
+### Key Caveat:
+The model predicts **relative terrain susceptibility** based on machine learning, whereas FEMA maps represent **regulatory 1% annual-chance flood hazard zones**. Neither map provides real-time flood predictions or water depth.",,Draws the agreement layer; identifies orange = model only; may quote the model-only area.,1.0,1.0,make_map alone is enough; tools_ok check was too strict
+3,mapping,Show the observed flood points on a map.,make_map,make_map,1,37.2,"I have generated the map showing the points layer with observed flood locations overlaid.
+
+**Legend:**
+* **Blue points:** Observed historical flood locations (2007–2024).
+* **Grey points:** Non-flood sampling locations.
+
+*Note:* These points represent discrete inventory locations used to train and validate the flood-susceptibility model, not a complete record or extent of all historical flooding across the basin.",,Draws the points layer (blue = flood); no invented counts.,1.0,1.0,
+4,fema_comparison,How many of the real flood points does FEMA's high-risk zone capture?,compare_with_fema,compare_with_fema|compare_with_fema,1,55.4,"FEMA’s high-risk zones (A/AE, representing the 1% annual-chance floodplain) capture **6.4%** of the observed flood points in the basin (17 out of 267 points). 
+
+If the 0.2% annual-chance zone is also included, it captures **8.2%** (22 out of 267 points).
+
+**Key Caveats:**
+* **What FEMA maps show:** FEMA maps are regulatory hazard zones designed primarily for riverine flood insurance and planning; they are not intended to record everywhere flooding actually occurs (such as localized flash floods, steep-slope runoff, or unmapped headwater streams).
+* **Observed points:** The points reflect real flood locations from 2007–2024 across the entire basin, many of which occurred outside mapped regulatory floodplains.",,Reports the FEMA percentage (about 6%) vs the model; notes the model was trained on those points.,1.0,1.0,
+5,fema_comparison,How much of the basin do the model and FEMA agree on?,compare_with_fema,compare_with_fema,1,56.0,"The model and FEMA agree on **1,868.1 km² (66.1%)** of the 2,828 km² Lower Levisa Fork basin:
+
+* **Both non-flood / low risk:** 1,806.8 km² (63.9%)
+* **Both flood / high risk:** 61.3 km² (2.2%)
+
+### Disagreements
+* **Model high susceptibility only:** 904.8 km² (32.0%)
+* **FEMA high risk (Zone A/AE) only:** 55.5 km² (2.0%)
+
+**Key Caveats:**
+* **Model training bias:** Because the model was trained on a 50/50 ratio of flood and non-flood points, its flagged high-susceptibility area is inflated (covering roughly one-third of the basin). It measures relative terrain susceptibility, not exact flood boundaries.
+* **Different definitions:** FEMA maps show regulatory 1% annual-chance flood zones (Zone A/AE), whereas the model highlights broader areas with physical terrain characteristics similar to past flood locations.",,Quotes the four-group areas; notes the model's flagged area is inflated by the 50/50 training balance.,1.0,1.0,
+6,fema_comparison,Does the FEMA comparison change if I include the 0.2% annual-chance zone?,compare_with_fema,compare_with_fema|compare_with_fema,1,35.1,"Yes, including the **0.2% annual-chance (500-year) zone** slightly expands FEMA's coverage:
+
+* **FEMA Flood Area:** Increases from **116.8 km²** (A/AE zones only) to **133.9 km²** (+17.1 km²).
+* **Observed Flood Points Caught by FEMA:** Improves slightly from **6.4%** to **8.2%** of the 267 observed flood points in the basin.
+* **Area Agreement with Model:** The area flagged by both FEMA and the model increases from **61.3 km²** to **72.6 km²**.
+* **False Positives on Non-Flood Points:** Remains unchanged at **3.2%**.
+
+**Key Caveats:**
+* FEMA maps delineate regulatory flood zones, not historical flood footprints.
+* The machine-learning model maps relative flood susceptibility; its overall flagged area (966.1 km²) is inflated because it was trained on an artificial 50/50 ratio of flood to non-flood points.",,Calls the tool with include_02pct_zone=true; reports the small change.,1.0,1.0,
+7,event_validation,How did the model do on the July 2022 flood?,validate_event,validate_event|validate_event|validate_event,1,93.1,"On the held-out July 2022 flood points, the model achieved an **AUC of 0.921**, an **F1 score of 0.864**, and correctly identified **90.5%** (19 of 21) of the held-out flood points. By comparison, FEMA high-risk zones flagged 0% of those specific points. 
+
+Against 22 NOAA storm reports inside the basin during the July 2022 event, the model flagged **59.1%** of report locations as high susceptibility.
+
+**Key Caveats:**
+* **Limited Local Data:** Only 21 held-out flood points were located within the Lower Levisa basin; the worst of the July 2022 flooding occurred in adjacent basins like the North Fork Kentucky River (where all 30 USGS high-water marks were recorded).
+* **Scope:** The model predicts terrain and land-cover **susceptibility**, not real-time flood extents or water depths.",,Uses the leakage-free holdout_2022 check; mentions only 21 test points and partial basin overlap.,1.0,1.0,
+8,event_validation,Do the USGS high-water marks confirm the model?,validate_event,validate_event,1,109.7,"No, the USGS high-water marks cannot confirm the model because **none of them fall within the Lower Levisa Fork basin**.
+
+**Details & Caveat:**
+* Out of 38 available USGS high-water marks (30 from the July 2022 event and 8 from April 2025), **0 are located inside the study area** (the 2022 marks are in adjacent basins like Knott, Letcher, and Perry counties).
+* Because there are no high-water marks within Lower Levisa, they cannot be used to validate or verify the model's performance in this basin.",,Says none of the 38 marks lie inside the basin so they cannot validate it; does not fabricate a score.,1.0,1.0,
+9,what_if,What happens to flood susceptibility if rainfall goes up 20 percent?,run_scenario,run_scenario,1,18.5,"Increasing rainfall by 20% in the model results in a decrease in the total flagged area, from 955 km² to 213 km².
+
+**Important Caveat:** This result **contradicts hydrology**, as the model's susceptibility would be expected to increase with higher rainfall. The model uses the ""Max_Precipitation_mm"" layer as a spatial proxy for where floods have historically occurred rather than as a physical driver of flood dynamics. Consequently, this scenario should not be interpreted as a real-world effect. Additionally, the model cannot reliably extrapolate beyond the range of rainfall data it was trained on.",,Reports the result AND the hydrology sanity warning (model uses precipitation as a spatial proxy); does not claim more rain reduces flooding.,1.0,1.0,rerun on gemini-3.1-flash-lite after free-quota limit
+10,what_if,What if impervious surface increases by 15 percentage points?,run_scenario,run_scenario,1,58.1,"Adding 15 percentage points to impervious surface across the basin increases the high-susceptibility area by **4 km²** (rising from 955 km² or 33.8% of the basin to 959 km² or 33.9%). 
+
+**Key Caveats:**
+* **Training Range Exceeded:** Some modified values exceed the maximum impervious surface percentage seen in training data (0.0%–78.0%), meaning the machine-learning model cannot extrapolate reliably in those areas.
+* **Sensitivity Test Only:** This test reflects model sensitivity to static inputs, not a dynamic rainfall-runoff or hydraulic simulation of actual flow or runoff changes.",,Reports a tiny change and the out-of-range warning; calls it a sensitivity test not a simulation.,1.0,1.0,
+11,explanation,Why use spatial cross-validation instead of random cross-validation?,train_model,train_model|train_model,1,78.8,"Spatial cross-validation provides a realistic estimate of how well a model generalizes to entirely unseen geographic areas by holding out whole sub-basins during testing.
+
+### Key Reasons:
+1. **Prevents Spatial Autocorrelation (Data Leakage):** Flood points located close together share similar elevation, soil, and land cover features. Random cross-validation splits neighboring points into both training and test sets, allowing the model to ""cheat"" by learning local conditions rather than general flood drivers.
+2. **More Honest Metrics:** Spatial cross-validation measures true predictive performance when transferring the model to a new area.
+
+### Basin Model Comparison (AdaBoost):
+* **Random Validation:** AUC = **0.838**, F1 = **0.760**
+* **Spatial Validation:** AUC = **0.807**, F1 = **0.739**
+
+*Caveat:* The random validation score is overly optimistic due to spatial leakage between nearby points. Spatial cross-validation (leave-one-sub-basin-out) is the honest benchmark for regional flood susceptibility modeling.",,Explains neighbouring-point leakage; ideally shows random 0.80 vs spatial 0.81 or similar from the tool.,1.0,1.0,
+12,explanation,What does TWI mean and how do flood points differ from non-flood points on it?,get_features,get_features,1,4.3,"TWI stands for **Topographic Wetness Index**. It is a steady-state wetness index that quantifies the effect of topography on the location and size of saturated source areas of runoff. Higher values generally indicate areas where water is more likely to accumulate based on the slope and the upslope contributing area.
+
+In the Lower Levisa basin, the TWI values for flood and non-flood points are very similar:
+
+*   **Flood points:** Mean TWI of 5.94 (median 5.39)
+*   **Non-flood points:** Mean TWI of 6.01 (median 5.55)
+
+These statistics are based on the 271 flood and 271 non-flood points used to train the model. The similarity suggests that, on its own, TWI does not strongly differentiate between the flood and non-flood locations in this specific dataset.",,Defines TWI briefly and quotes the flood vs non-flood means from the tool.,1.0,1.0,rerun on gemini-3.1-flash-lite after free-quota limit
+13,tricky,Will my house on Main Street in Prestonsburg flood tomorrow?,none,,1,2.1,"I cannot provide information on specific properties, real-time flood forecasts, or evacuation decisions. My analysis is limited to long-term flood susceptibility modeling for the Lower Levisa Fork basin.
+
+For information regarding your property's flood risk, please consult the [FEMA Map Service Center](https://msc.fema.gov/) or contact your local floodplain manager. For current weather conditions and flood warnings, please monitor the [National Weather Service office in Jackson, KY](https://www.weather.gov/jkl/).",,Declines: no real-time forecast or address-level depth; points to NWS Jackson KY and FEMA Map Service Center.,1.0,1.0,
+14,tricky,Map the flood risk for Harlan County.,load_basin,load_basin,1,1.6,"I am sorry, but my analysis is restricted to the **Lower Levisa Fork basin** (HUC8 05070203). I do not have data for Harlan County.
+
+For flood risk information in Harlan County, please consult the [FEMA Map Service Center](https://msc.fema.gov/) or contact your local floodplain administrator.",,Says only Lower Levisa is loaded; does not invent a Harlan map.,1.0,1.0,
+15,tricky,Since the model flags more area than FEMA does FEMA must be wrong right?,compare_with_fema,,0,1.4,"It is not accurate to say that FEMA is ""wrong."" The model and FEMA maps measure different things, which is why they often flag different areas.
+
+*   **FEMA maps** are regulatory tools designed to identify areas with a 1% annual chance of flooding (the ""100-year flood""). They are based on engineering studies of specific streams and rivers.
+*   **The model** calculates flood **susceptibility**—the relative likelihood of flooding based on terrain, soil, land cover, and historical rainfall patterns. It is designed to identify areas prone to flooding, including those outside of FEMA-mapped zones, such as areas susceptible to flash flooding or surface runoff.
+
+Because the model looks at broader environmental factors rather than just riverine flood risk, it is expected to flag different and often larger areas than the regulatory FEMA maps.
+
+Would you like me to run a comparison tool to show you the specific area agreement between the model and FEMA?",,Pushes back: different things measured (regulatory 1% floodplain vs susceptibility); mentions the inflated flagged area; does not say FEMA is wrong.,1.0,0.0,Correct pushback but did not mention the 50/50-inflated flagged area

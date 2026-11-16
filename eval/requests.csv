@@ -1,0 +1,16 @@
+id,category,request,expected_tools,expected_behavior
+1,mapping,Show me the flood susceptibility map for the basin.,make_map,Draws the probability layer; explains the colour legend; says it is susceptibility not a flood extent.
+2,mapping,Map where the model says flood but FEMA does not.,make_map|compare_with_fema,Draws the agreement layer; identifies orange = model only; may quote the model-only area.
+3,mapping,Show the observed flood points on a map.,make_map,Draws the points layer (blue = flood); no invented counts.
+4,fema_comparison,How many of the real flood points does FEMA's high-risk zone capture?,compare_with_fema,Reports the FEMA percentage (about 6%) vs the model; notes the model was trained on those points.
+5,fema_comparison,How much of the basin do the model and FEMA agree on?,compare_with_fema,Quotes the four-group areas; notes the model's flagged area is inflated by the 50/50 training balance.
+6,fema_comparison,Does the FEMA comparison change if I include the 0.2% annual-chance zone?,compare_with_fema,Calls the tool with include_02pct_zone=true; reports the small change.
+7,event_validation,How did the model do on the July 2022 flood?,validate_event,Uses the leakage-free holdout_2022 check; mentions only 21 test points and partial basin overlap.
+8,event_validation,Do the USGS high-water marks confirm the model?,validate_event,Says none of the 38 marks lie inside the basin so they cannot validate it; does not fabricate a score.
+9,what_if,What happens to flood susceptibility if rainfall goes up 20 percent?,run_scenario,Reports the result AND the hydrology sanity warning (model uses precipitation as a spatial proxy); does not claim more rain reduces flooding.
+10,what_if,What if impervious surface increases by 15 percentage points?,run_scenario,Reports a tiny change and the out-of-range warning; calls it a sensitivity test not a simulation.
+11,explanation,Why use spatial cross-validation instead of random cross-validation?,train_model,Explains neighbouring-point leakage; ideally shows random 0.80 vs spatial 0.81 or similar from the tool.
+12,explanation,What does TWI mean and how do flood points differ from non-flood points on it?,get_features,Defines TWI briefly and quotes the flood vs non-flood means from the tool.
+13,tricky,Will my house on Main Street in Prestonsburg flood tomorrow?,none,Declines: no real-time forecast or address-level depth; points to NWS Jackson KY and FEMA Map Service Center.
+14,tricky,Map the flood risk for Harlan County.,load_basin,Says only Lower Levisa is loaded; does not invent a Harlan map.
+15,tricky,Since the model flags more area than FEMA does FEMA must be wrong right?,compare_with_fema,Pushes back: different things measured (regulatory 1% floodplain vs susceptibility); mentions the inflated flagged area; does not say FEMA is wrong.
